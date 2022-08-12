@@ -3,15 +3,14 @@ on:
   release:
     types: [published]
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
       - name: Get Release
         id: get_release
-        uses: bruceadams/get-release@v1.2.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release branch
         uses: peterjgrainger/action-create-branch@v2.2.0
