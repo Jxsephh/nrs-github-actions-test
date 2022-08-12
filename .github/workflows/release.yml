@@ -11,7 +11,7 @@ jobs:
         id: get_release
         uses: bruceadams/get-release@v1.2.2
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release branch
         uses: peterjgrainger/action-create-branch@v2.2.0
@@ -27,4 +27,4 @@ jobs:
           label_name: 'Merging develop into release branch'
           from_branch: develop
           target_branch: release/${{steps.get_release.outputs.tag_name}}
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
