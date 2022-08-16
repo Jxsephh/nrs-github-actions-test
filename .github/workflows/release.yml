@@ -3,52 +3,27 @@ on:
   release:
     types: [published]
 
-# env:
-# GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  log-default-env:
+  create-release:
     runs-on: ubuntu-latest
-    steps: 
-      - name: Default ENV Variables
-        run: |
-          echo "HOME: ${HOME}"
-          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
-          echo "GITHUB_ACTION: ${GITHUB_ACTION}"
-          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
-          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
-          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
-          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
-          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
-          echo "GITHUB_SHA: ${GITHUB_SHA}"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-          echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
-  # create-release:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/labeler@v4
-  #       with:
-  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
-# jobs:
-#   create-release:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Get Release
-#         id: get_release
+    steps:
+      - name: Get Release
+        id: get_release
 
-#       - name: Create release branch
-#         uses: peterjgrainger/action-create-branch@v2.2.0
-#         with:
-#           branch: 'release/${{steps.get_release.outputs.tag_name}}'
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release branch
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        with:
+          branch: 'release/${{steps.get_release.outputs.tag_name}}'
 
-#       # - name: Increment POM versions
-#       # Need to figure out how to determine which versions need incrementing
+      # - name: Increment POM versions
+      # Need to figure out how to determine which versions need incrementing
 
-#       - name: Merge develop -> release branch
-#         uses: devmasx/merge-branch@master
-#         with:
-#           label_name: 'Merging develop into release branch'
-#           from_branch: develop
-#           target_branch: release/${{steps.get_release.outputs.tag_name}}
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Merge develop -> release branch
+        uses: devmasx/merge-branch@master
+        with:
+          label_name: 'Merging develop into release branch'
+          from_branch: develop
+          target_branch: release/${{steps.get_release.outputs.tag_name}}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
