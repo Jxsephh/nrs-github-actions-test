@@ -32,7 +32,7 @@ jobs:
         uses: peterjgrainger/action-create-branch@v2.2.0
         id: get_release
         with:
-          branch: 'release/${{steps.get_release.outputs.tag_name}}-${{steps.get_release.outputs.name}}'
+          branch: 'release/${{steps.get_release.outputs.tag_name}}'
 
       # - name: Increment POM versions
       # Need to figure out how to determine which versions need incrementing
