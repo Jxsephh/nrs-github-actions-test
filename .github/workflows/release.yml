@@ -1,6 +1,5 @@
 name: Release
 on:
-  push:
   release:
     types: [published]
 
@@ -10,12 +9,20 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Get release
+      - name: Get release information
         id: get_release
+        uses: cardinalby/git-get-release-action@1.2.2
+        with:
+          latest: true
+      
+      - name: Print release information
         run: |
           echo "Steps: ${{toJson(steps)}}"
           echo "get_release: ${{steps.get_release}}"
           echo "Outputs: ${{steps.get_release.outputs}}"
+          echo "tag_name: ${{steps.get_release.outputs.id}}"
+          echo "tag_name: ${{steps.get_release.outputs.name}}"
+          echo "tag_name: ${{steps.get_release.outputs.body}}"
           echo "tag_name: ${{steps.get_release.outputs.tag_name}}"
 
       # - name: Create release branch
