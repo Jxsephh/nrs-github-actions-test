@@ -52,4 +52,5 @@ jobs:
           ref: develop
       - name: check soap lib diff
         run: | 
+          cd github-actions-test
           $diff = git diff develop master
