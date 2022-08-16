@@ -50,7 +50,6 @@ jobs:
           repository: Jxsephh/github-actions-test
           path: github-actions-test
           ref: develop
-      - name: check soap lib diff
-        run: | 
+      - run: | 
           cd github-actions-test
           $diff = git diff develop master
