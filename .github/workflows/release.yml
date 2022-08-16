@@ -29,8 +29,8 @@ jobs:
 
 
       - name: Create release branch
+        id: create_release
         uses: peterjgrainger/action-create-branch@v2.2.0
-        id: get_release
         with:
           branch: 'release/${{steps.get_release.outputs.tag_name}}'
 
