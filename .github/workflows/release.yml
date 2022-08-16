@@ -4,14 +4,29 @@ on:
     types: [published]
 
 # env:
-  # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  create-release:
+  log-default-env:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/labeler@v4
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+    steps: 
+      - name: Default ENV Variables
+        run: |
+          echo "HOME: ${HOME}"
+          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+          echo "GITHUB_ACTION: ${GITHUB_ACTION}"
+          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "GITHUB_SHA: ${GITHUB_SHA}"
+          echo "GITHUB_REF: ${GITHUB_REF}
+  # create-release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/labeler@v4
+  #       with:
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
 # jobs:
 #   create-release:
 #     runs-on: ubuntu-latest
@@ -36,4 +51,3 @@ jobs:
 #           from_branch: develop
 #           target_branch: release/${{steps.get_release.outputs.tag_name}}
 #           github_token: ${{ secrets.GITHUB_TOKEN }}
-          
