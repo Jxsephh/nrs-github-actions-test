@@ -51,6 +51,10 @@ jobs:
       #     path: github-actions-test
       #     ref: develop
       - name: check soap lib diff
+        uses: actions/checkout@v3
+        with:
+          repository: Jxsephh/github-actions-test
+          path: github-actions-test
+          ref: develop
         run: | 
-          git-checkout https://github.com/Jxsephh/github-actions-test
           $diff = git diff develop master
