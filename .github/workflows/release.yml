@@ -40,14 +40,18 @@ jobs:
     #       from_branch: develop
     #       target_branch: release/${{steps.get_release.outputs.tag_name}}
     #       github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: main
-
-      - name: Checkout private tools
-        uses: actions/checkout@v3
-        with:
-          repository: Jxsephh/github-actions-test
-          path: github-actions-test
-          ref: develop
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     path: main
+      # - name: Checkout private tools
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: Jxsephh/github-actions-test
+      #     path: github-actions-test
+      #     ref: develop
+      - name: check soap lib diff
+        run: | 
+          git-checkout https://github.com/Jxsephh/github-actions-test
+          $diff = git diff develop master
+          echo '${{ $diff }}'
