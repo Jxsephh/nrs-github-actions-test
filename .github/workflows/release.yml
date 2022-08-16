@@ -22,7 +22,6 @@ jobs:
           echo "GITHUB_SHA: ${GITHUB_SHA}"
           echo "GITHUB_REF: ${GITHUB_REF}"
           echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
-          echo "GITHUB_TOKEN 2: ${{GITHUB_TOKEN}}"
   # create-release:
   #   runs-on: ubuntu-latest
   #   steps:
