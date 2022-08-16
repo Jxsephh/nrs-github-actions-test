@@ -47,10 +47,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: master
+          path: main
+          ref: develop
 
       - name: Checkout private tools
         uses: actions/checkout@v3
         with:
           repository: Jxsephh/github-actions-test
-          path: develop
+          path: github-actions-test
+          ref: master
