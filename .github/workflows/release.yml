@@ -12,7 +12,7 @@ jobs:
       - name: Get release
         id: get_release
         run: |
-          echo "Steps: ${{steps}}"
+          echo "Steps: ${{toJson(steps)}}"
           echo "get_release: ${{steps.get_release}}"
           echo "Outputs: ${{steps.get_release.outputs}}"
           echo "tag_name: ${{steps.get_release.outputs.tag_name}}"
