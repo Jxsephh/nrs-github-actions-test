@@ -54,4 +54,3 @@ jobs:
         run: | 
           git-checkout https://github.com/Jxsephh/github-actions-test
           $diff = git diff develop master
-          echo '${{ $diff }}'
