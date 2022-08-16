@@ -52,5 +52,6 @@ jobs:
           ref: develop
           fetch-depth: '0'
       - run: | 
+          cd github-actions-test
           git status
           git diff develop master
