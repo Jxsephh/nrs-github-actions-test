@@ -54,4 +54,4 @@ jobs:
       - run: | 
           cd github-actions-test
           git status
-          git diff develop master
+          git diff develop -- master
