@@ -20,7 +20,9 @@ jobs:
           echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
           echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
           echo "GITHUB_SHA: ${GITHUB_SHA}"
-          echo "GITHUB_REF: ${GITHUB_REF}
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+          echo "GITHUB_TOKEN 2: ${{GITHUB_TOKEN}}"
   # create-release:
   #   runs-on: ubuntu-latest
   #   steps:
