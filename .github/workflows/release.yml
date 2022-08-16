@@ -50,5 +50,6 @@ jobs:
           repository: Jxsephh/github-actions-test
           path: github-actions-test
           ref: develop
+          fetch-depth: 0
       - run: | 
           git diff develop master
