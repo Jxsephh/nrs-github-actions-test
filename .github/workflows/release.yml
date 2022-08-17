@@ -9,12 +9,7 @@ env:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    steps:      
-      - name: Print envs
-        run: |
-          echo '${{ toJSON(github) }}'   
-          echo '${{ toJSON(env) }}'
-
+    steps:
       - name: Checkout other repo
         uses: actions/checkout@v3
         with:
@@ -23,15 +18,13 @@ jobs:
           fetch-depth: '0'
         
       - name: Check for changes in repo
-        run: | 
-          git status
-          diff="$(git diff develop origin/master)"
-          if [ -z "$diff" ] ; then
-            echo "Branches are the same"
-          else
-            echo "Branches are different"
-          fi
-          echo "$diff"
+        run: echo "UPGRADE_SOAPLIB="$(./.github/workflows/scripts/check-changes-across-branches.sh . develop origin/master) >> $GITHUB_ENV
+
+      - name: Upgrade pom.xml versions
+        run: |
+          if [ ${{ env.UPGRADE_SOAPLIB }} = 1 ] ; then
+            echo "Soaplib has changes, upgrading version in pom.xml"
+
 
 
 
