@@ -9,20 +9,35 @@ env:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    steps:
+    steps:      
+      - name: Print envs
+        run: |
+          echo '${{ toJSON(github) }}'   
+          echo '${{ toJSON(env) }}'
+
+      - name: Checkout other repo
+        uses: actions/checkout@v3
+        with:
+          repository: Jxsephh/github-actions-test
+          ref: develop
+          fetch-depth: '0'
+        
+      - name: Check for changes in repo
+        run: | 
+          git status
+          diff = git diff develop origin/master
+
+      - name: Display changes
+        run: echo $diff
+
+
+
+      ## WIP ##
       # - name: Get release information
       #   id: get_release
       #   uses: cardinalby/git-get-release-action@1.2.2
       #   with:
       #     latest: true
-      
-      - name: Print release information
-        run: |
-          echo '${{ toJSON(github) }}'   
-          echo '${{ toJSON(env) }}'
-
-
-
 
       # - name: Create release branch
       #   id: create_release
@@ -44,14 +59,3 @@ jobs:
       #   uses: actions/checkout@v3
       #   with:
       #     path: main
-      - name: Checkout private tools
-        uses: actions/checkout@v3
-        with:
-          repository: Jxsephh/github-actions-test
-          path: github-actions-test
-          ref: develop
-          fetch-depth: '0'
-      - run: | 
-          cd github-actions-test
-          git status
-          git diff develop origin/master
