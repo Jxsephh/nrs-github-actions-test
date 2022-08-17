@@ -18,7 +18,9 @@ jobs:
           fetch-depth: '0'
         
       - name: Check for changes in repo
-        run: echo "UPGRADE_SOAPLIB="$(./.github/workflows/scripts/check-changes-across-branches.sh . develop origin/master) >> $GITHUB_ENV
+        run: |
+          ls
+          echo "UPGRADE_SOAPLIB="$(./.github/workflows/scripts/check-changes-across-branches.sh . develop origin/master) >> $GITHUB_ENV
 
       - name: Upgrade pom.xml versions
         run: |
