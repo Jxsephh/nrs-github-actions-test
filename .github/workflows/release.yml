@@ -25,10 +25,15 @@ jobs:
       - name: Check for changes in repo
         run: | 
           git status
-          diff = git diff develop origin/master
+          diff="$(git diff develop origin/master)"
+          if [ -z "$diff"] ; then
+            echo "Branches are the same"
+          else
+            echo "Branches are different"
+          fi
 
       - name: Display changes
-        run: echo $diff
+        run: echo "$diff"
 
 
 
