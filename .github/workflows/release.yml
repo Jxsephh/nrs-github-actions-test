@@ -22,7 +22,7 @@ jobs:
 
       - name: Upgrade pom.xml versions
         run: |
-          if [ $UPGRADE_SOAPLIB = 1 ] ; then
+          if [ $UPGRADE_SOAPLIB = "1" ] ; then
             echo "Soaplib has changes, upgrading version in pom.xml"
           fi
         env:
