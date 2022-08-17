@@ -22,15 +22,9 @@ jobs:
           path: github-actions-test
           ref: develop
           fetch-depth: '0'
-
-      - name: Install YAML parser
-        run: sudo snap install yq
         
       - name: Check for changes in repo
         run: |
-          ls -al main
-          ls -al main/.github/
-          ls -al main/.github/workflows/
           echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
 
       - name: Upgrade pom.xml versions
