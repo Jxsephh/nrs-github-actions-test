@@ -29,6 +29,7 @@ jobs:
           ls -al main/.github/scripts
           UPGRADE_SOAPLIB=$(./main/.github/scripts/check-changes-across-branches.sh ../../../github-actions-test develop origin/master) 
           echo "UPGRADE_SOAPLIB="$UPGRADE_SOAPLIB >> $GITHUB_ENV
+        shell: bash
 
       - name: Upgrade pom.xml versions
         run: |
