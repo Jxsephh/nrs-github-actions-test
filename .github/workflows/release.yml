@@ -22,8 +22,11 @@ jobs:
 
       - name: Upgrade pom.xml versions
         run: |
-          if [ $UPGRADE_SOAPLIB = "1" ] ; then
+          echo $UPGRADE_SOAPLIB
+          if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
             echo "Soaplib has changes, upgrading version in pom.xml"
+          else
+            echo "Soaplib has no new changes, skipping..."
           fi
         env:
           UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
