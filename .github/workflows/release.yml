@@ -25,7 +25,9 @@ jobs:
         
       - name: Check for changes in repo
         run: |
-          ls -al
+          ls -al main
+          ls -al main/.github/workflows
+          ls -al main/.github/workflows/scripts
           echo "UPGRADE_SOAPLIB="$(./main/.github/workflows/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
 
       - name: Upgrade pom.xml versions
