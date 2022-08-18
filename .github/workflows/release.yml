@@ -39,6 +39,11 @@ jobs:
         env:
           UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
 
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Upgrading dependency versions"
+
 
 
       ## WIP ##
