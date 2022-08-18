@@ -30,9 +30,11 @@ jobs:
 
       - name: Upgrade pom.xml versions
         run: |
-          echo $UPGRADE_SOAPLIB
           if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
             echo "Soaplib has changes, upgrading version in pom.xml"
+            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54-SNAPSHOT -q -DforceStdout
+            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           else
             echo "Soaplib has no new changes, skipping..."
           fi
