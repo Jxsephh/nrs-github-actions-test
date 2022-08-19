@@ -7,7 +7,8 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  create-release:
+  update-dependencies:
+    name: Update dependency versions
     runs-on: ubuntu-latest
     steps:
       - name: Checkout scripts
@@ -31,7 +32,7 @@ jobs:
           if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
             echo "Soaplib has changes, upgrading version in pom.xml"
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54-SNAPSHOT -q -DforceStdout
+            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           else
             echo "Soaplib has no new changes, skipping..."
@@ -43,6 +44,25 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Upgrading dependency versions"
+
+  create-release:
+    name: Create release branch
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release branch
+        id: create_release
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        with:
+          branch: 'release/canyonlands'
+      
+      - name: Merge develop -> release branch
+        uses: devmasx/merge-branch@master
+        with:
+          label_name: 'Merging develop into release branch'
+          from_branch: develop
+          target_branch: release/canyonlands
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
 
 
