@@ -47,7 +47,7 @@ jobs:
 
   create-release:
     name: Create release branch
-    needs: [create-release]
+    needs: [update-dependencies]
     runs-on: ubuntu-latest
     steps:
       - name: Create release branch
