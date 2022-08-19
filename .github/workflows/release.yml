@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout scripts
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 
+        with:
+          ref: master
 
       - name: Checkout other repo
         uses: actions/checkout@v3
@@ -34,15 +36,19 @@ jobs:
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+            echo "UNCOMMITED_CHANGES="false >> $GITHUB_ENV
           else
             echo "Soaplib has no new changes, skipping..."
           fi
+
         env:
           UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
 
       - name: Commit updates
         uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ env.UNCOMITTED_CHANGES == true }}
         with:
+          branch: develop
           commit_message: "Upgrading dependency versions"
 
   create-release:
@@ -51,7 +57,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create release branch
-        id: create_release
         uses: peterjgrainger/action-create-branch@v2.2.0
         with:
           branch: 'release/canyonlands'
