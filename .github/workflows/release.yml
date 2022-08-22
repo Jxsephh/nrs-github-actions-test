@@ -14,6 +14,7 @@ jobs:
       - name: Checkout scripts
         uses: actions/checkout@v3 
         with:
+          path: main
           ref: master
 
       - name: Checkout other repo
@@ -24,6 +25,14 @@ jobs:
           ref: develop
           fetch-depth: '0'
         
+      - name: Merge develop -> release branch
+        uses: devmasx/merge-branch@master
+        with:
+          label_name: 'Merging develop into release branch'
+          from_branch: develop
+          target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Check for changes in repo
         run: |
           echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
@@ -45,29 +54,29 @@ jobs:
           UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
 
       - name: Commit updates
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: ${{ env.UNCOMITTED_CHANGES == true }}
+        if: ${{ env.UNCOMMITTED_CHANGES }} == true
+        uses: stefanzweifel/git-auto-commit-action@v4.14.1
         with:
-          branch: develop
-          commit_message: "Upgrading dependency versions"
+          branch: release/canyonlands
+          commit_message: "Updating versions"
+          # create_branch: true
+          repository: main
 
-  create-release:
-    name: Create release branch
-    needs: [update-dependencies]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release branch
-        uses: peterjgrainger/action-create-branch@v2.2.0
-        with:
-          branch: 'release/canyonlands'
+      # - name: Create pull request
+      #   id: cpr
+      #   uses: peter-evans/create-pull-request@v4.1.1
+      #   with:
+      #     base: master
+      #     branch: release/canyonlands
+      #     path: main
+      #     reviewers: Jxsephh
+      #     commit-message: "Updating things"
       
-      - name: Merge develop -> release branch
-        uses: devmasx/merge-branch@master
-        with:
-          label_name: 'Merging develop into release branch'
-          from_branch: develop
-          target_branch: release/canyonlands
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Check outputs
+      #   if: ${{ steps.cpr.outputs.pull-request-number }}
+      #   run: |
+      #     echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
+      #     echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
 
 
