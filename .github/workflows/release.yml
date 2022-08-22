@@ -67,15 +67,14 @@ jobs:
           commit_message: "Updating things"
           repository: main
 
-      # - name: Create pull request and commit updates
-      #   id: cpr
-      #   uses: peter-evans/create-pull-request@v4.1.1
-      #   with:
-      #     base: master
-      #     branch: release/canyonlands
-      #     path: main
-      #     reviewers: Jxsephh
-      #     commit-message: "Updating things"
+      - name: Create pull request and commit updates
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.1.1
+        with:
+          base: master
+          branch: release/canyonlands
+          path: main
+          reviewers: Jxsephh
       
       # - name: Check outputs
       #   if: ${{ steps.cpr.outputs.pull-request-number }}
