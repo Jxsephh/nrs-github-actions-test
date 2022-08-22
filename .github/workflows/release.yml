@@ -35,7 +35,7 @@ jobs:
 
       - name: Check for changes in repo
         run: |
-          echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
+          echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
       - name: Upgrade pom.xml versions
