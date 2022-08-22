@@ -1,4 +1,4 @@
-name: Release
+name: Create Release
 on:
   push:
   # release:
@@ -24,7 +24,12 @@ jobs:
           path: github-actions-test
           ref: develop
           fetch-depth: '0'
-        
+
+      - name: Create release branch
+        uses: peterjgrainger/action-create-branch@v2.0.1
+        with:
+          branch: release/canyonlands
+
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
         with:
@@ -40,16 +45,17 @@ jobs:
 
       - name: Upgrade pom.xml versions
         run: |
+          echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
+          cd main
           if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
             echo "Soaplib has changes, upgrading version in pom.xml"
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
             echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            echo "UNCOMMITED_CHANGES="false >> $GITHUB_ENV
+            echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
           else
             echo "Soaplib has no new changes, skipping..."
           fi
-
         env:
           UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
 
@@ -58,11 +64,10 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4.14.1
         with:
           branch: release/canyonlands
-          commit_message: "Updating versions"
-          # create_branch: true
+          commit_message: "Updating things"
           repository: main
 
-      # - name: Create pull request
+      # - name: Create pull request and commit updates
       #   id: cpr
       #   uses: peter-evans/create-pull-request@v4.1.1
       #   with:
@@ -77,6 +82,34 @@ jobs:
       #   run: |
       #     echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
       #     echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+  # create-release-pr:
+  #   name: Create release branch and pull request
+  #   needs: [update-dependencies]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: develop
+
+  #     - name: Create pull request
+  #       id: cpr
+  #       uses: peter-evans/create-pull-request@v4.1.1
+  #       with:
+  #         base: master
+  #         branch: release/canyonlands
+  #         reviewers: Jxsephh
+      
+  #     - name: Check outputs
+  #       if: ${{ steps.cpr.outputs.pull-request-number }}
+  #       run: |
+  #         echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
+  #         echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+    
+
+
+
+
 
 
 
