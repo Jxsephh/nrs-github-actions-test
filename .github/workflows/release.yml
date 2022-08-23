@@ -41,12 +41,12 @@ jobs:
       - name: Check for changes in repo
         run: |
           echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
+          echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
         shell: bash
 
       # - name: Update local pom.xml
       #   if: ${{ env.UPGRADE_SOAPLIB }} == true
       #   run: |
-      #     echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
       #     cd main
       #     echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
       #     mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
@@ -57,7 +57,18 @@ jobs:
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd github-actions-test
+          touch idk.xml
           ls -al
+
+      - name: Commit updates to SOAPLIB
+        if: ${{ env.UPGRADE_SOAPLIB }} == true
+        uses: stefanzweifel/git-auto-commit-action@v4.14.1
+        with:
+          branch: develop
+          commit_message: "Testing pushing from another repo"
+          repository: github-actions-test
+
+          
 
       # - name: Commit updates in local repository
       #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
