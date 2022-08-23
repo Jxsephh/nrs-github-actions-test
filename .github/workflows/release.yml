@@ -1,4 +1,4 @@
-name: Create Release
+name: Release
 on:
   # push:
   release:
@@ -19,7 +19,6 @@ jobs:
       - name: Checkout scripts
         uses: actions/checkout@v3 
         with:
-          path: main
           ref: master
 
       - name: Checkout other repo
@@ -29,123 +28,51 @@ jobs:
           path: github-actions-test
           ref: develop
           fetch-depth: '0'
-
-      # - name: Create release branch
-      #   uses: peterjgrainger/action-create-branch@v2.0.1
-      #   with:
-      #     branch: release/canyonlands
-
+        
       - name: Check for changes in repo
         run: |
-          echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
-          echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
+          echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
-      - name: Update local pom.xml
-        if: ${{ env.UPGRADE_SOAPLIB }} == true
+      - name: Upgrade pom.xml versions
         run: |
-          cd main
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-          echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
+          if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
+            echo "Soaplib has changes, upgrading version in pom.xml"
+            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
+            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+            echo "UNCOMMITED_CHANGES="false >> $GITHUB_ENV
+          else
+            echo "Soaplib has no new changes, skipping..."
+          fi
 
-      # - name: Update SOAPLIB pom.xml
-      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
-      #   run: |
-      #     cd github-actions-test
-      #     touch idk.xml
-      #     git add .
-      #     ls -al
+        env:
+          UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
 
-      # - name: Commit updates to SOAPLIB
-      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: develop
-      #     commit_message: "Testing pushing from another repo"
-      #     repository: github-actions-test
-
-          
-
-      # - name: Commit updates in local repository
-      #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: release/canyonlands
-      #     commit_message: "Updating things"
-      #     repository: main
-
-      # - name: Checkout release branch
-      #   uses: actions/checkout@v3 
-      #   with:
-      #     path: release
-      #     ref: release/canyonlands
-
-      - name: Create pull request and commit updates
-        id: cpr
-        uses: peter-evans/create-pull-request@v4.1.1
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ env.UNCOMITTED_CHANGES == true }}
         with:
-          base: master
-          branch: release/canyonlands
-          path: main
-          reviewers: Jxsephh
+          branch: develop
+          commit_message: "Upgrading dependency versions"
 
+  create-release:
+    name: Create release branch
+    needs: [update-dependencies]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release branch
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        with:
+          branch: 'release/canyonlands'
+      
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
         with:
-          type: now
+          label_name: 'Merging develop into release branch'
           from_branch: develop
-          target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
+          target_branch: release/canyonlands
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Commit updates in local repository
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: release/canyonlands
-      #     commit_message: "Merging develop into release branch"
-      #     repository: main
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: Jxsephh/github-actions-test
-          event-type: my-event
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
-      
-      # - name: Check outputs
-      #   if: ${{ steps.cpr.outputs.pull-request-number }}
-      #   run: |
-      #     echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
-      #     echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-  # create-release-pr:
-  #   name: Create release branch and pull request
-  #   needs: [update-dependencies]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: develop
-
-  #     - name: Create pull request
-  #       id: cpr
-  #       uses: peter-evans/create-pull-request@v4.1.1
-  #       with:
-  #         base: master
-  #         branch: release/canyonlands
-  #         reviewers: Jxsephh
-      
-  #     - name: Check outputs
-  #       if: ${{ steps.cpr.outputs.pull-request-number }}
-  #       run: |
-  #         echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
-  #         echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-    
-
-
-
-
 
 
 
