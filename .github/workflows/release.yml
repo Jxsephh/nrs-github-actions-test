@@ -83,6 +83,7 @@ jobs:
         with:
           base: master
           branch: release/canyonlands
+          path: main
           reviewers: Jxsephh
 
       - name: Merge develop -> release branch
