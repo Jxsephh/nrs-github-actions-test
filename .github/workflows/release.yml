@@ -58,6 +58,7 @@ jobs:
         run: |
           cd github-actions-test
           touch idk.xml
+          git status
           ls -al
 
       - name: Commit updates to SOAPLIB
@@ -66,8 +67,6 @@ jobs:
         with:
           branch: develop
           commit_message: "Testing pushing from another repo"
-          commit_user_name: Jxsephh
-          commit_user_email: josephsantanapr@gmail.com
           repository: github-actions-test
 
           
