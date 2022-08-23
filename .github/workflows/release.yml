@@ -1,8 +1,8 @@
 name: Create Release
 on:
-  # push:
-  release:
-    types: [published]
+  push:
+  # release:
+  #   types: [published]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -11,7 +11,8 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - run: |
-            echo "Name: ${{ github.event.release.name }} Description: ${{ github.event.release.body }}"
+            echo "Name: ${{ github.event.release.name }}"
+            echo "Description: ${{ github.event.release.body }}"
   update-dependencies:
     name: Update dependency versions
     runs-on: ubuntu-latest
