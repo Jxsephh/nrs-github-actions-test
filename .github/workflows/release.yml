@@ -25,62 +25,62 @@ jobs:
           ref: develop
           fetch-depth: '0'
 
-      - name: Create release branch
-        uses: peterjgrainger/action-create-branch@v2.0.1
-        with:
-          branch: release/canyonlands
+      # - name: Create release branch
+      #   uses: peterjgrainger/action-create-branch@v2.0.1
+      #   with:
+      #     branch: release/canyonlands
 
-      - name: Merge develop -> release branch
-        uses: devmasx/merge-branch@master
-        with:
-          label_name: 'Merging develop into release branch'
-          from_branch: develop
-          target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Merge develop -> release branch
+      #   uses: devmasx/merge-branch@master
+      #   with:
+      #     label_name: 'Merging develop into release branch'
+      #     from_branch: develop
+      #     target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check for changes in repo
         run: |
           echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
-      - name: Upgrade pom.xml versions
+      # - name: Update local pom.xml
+      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
+      #   run: |
+      #     echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
+      #     cd main
+      #     echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+      #     mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
+      #     echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+      #     echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
+
+      - name: Update SOAPLIB pom.xml
+        if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
-          echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
-          cd main
-          if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
-            echo "Soaplib has changes, upgrading version in pom.xml"
-            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
-            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
-          else
-            echo "Soaplib has no new changes, skipping..."
-          fi
-        env:
-          UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
+          cd github-actions-test
+          ls -al
 
-      - name: Commit updates
-        if: ${{ env.UNCOMMITTED_CHANGES }} == true
-        uses: stefanzweifel/git-auto-commit-action@v4.14.1
-        with:
-          branch: release/canyonlands
-          commit_message: "Updating things"
-          repository: main
+      # - name: Commit updates in local repository
+      #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Updating things"
+      #     repository: main
 
-      - name: Checkout release branch
-        uses: actions/checkout@v3 
-        with:
-          path: release
-          ref: release/canyonlands
+      # - name: Checkout release branch
+      #   uses: actions/checkout@v3 
+      #   with:
+      #     path: release
+      #     ref: release/canyonlands
 
-      - name: Create pull request and commit updates
-        id: cpr
-        uses: peter-evans/create-pull-request@v4.1.1
-        with:
-          base: master
-          branch: release/canyonlands
-          path: release
-          reviewers: Jxsephh
+      # - name: Create pull request and commit updates
+      #   id: cpr
+      #   uses: peter-evans/create-pull-request@v4.1.1
+      #   with:
+      #     base: master
+      #     branch: release/canyonlands
+      #     path: release
+      #     reviewers: Jxsephh
       
       # - name: Check outputs
       #   if: ${{ steps.cpr.outputs.pull-request-number }}
