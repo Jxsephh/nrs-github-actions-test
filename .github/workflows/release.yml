@@ -93,6 +93,13 @@ jobs:
           from_branch: develop
           target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Commit updates in local repository
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Merging develop into release branch"
+      #     repository: main
       
       # - name: Check outputs
       #   if: ${{ steps.cpr.outputs.pull-request-number }}
