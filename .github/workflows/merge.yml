@@ -13,6 +13,7 @@ jobs:
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
         with:
+          label_name: 'release'
           from_branch: develop
           target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
