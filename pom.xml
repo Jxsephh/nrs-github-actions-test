@@ -15,8 +15,8 @@
 	<description>Testing GitHub Actions for NRS</description>
 	<properties>
 		<java.version>17</java.version>
-		<soapLib.version>54-SNAPSHOT</soapLib.version>
-		<restLib.version>127-SNAPSHOT</restLib.version>
+		<soapLib.version>54</soapLib.version>
+		<restLib.version>128</restLib.version>
 	</properties>
 	<dependencies>
 		<dependency>
