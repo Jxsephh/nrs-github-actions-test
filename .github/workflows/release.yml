@@ -5,9 +5,6 @@ on:
       release_name:
         description: 'Release branch name'
         required: true
-      nrs_version:
-        description: New version of NRS'
-        required: true
       soaplib_version:
         description: 'New version of SOAPLIB'
         required: false
@@ -51,7 +48,7 @@ jobs:
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
 
       - name: Create pull request and commit updates
@@ -81,7 +78,7 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
           event-type: my-event
-          client-payload: '"soaplib_version": "${{ inputs.soaplib_version }}", "restlib_version": "${{ inputs.restlib_version }}"'
+          client-payload: '{"soaplib_version": "${{ inputs.soaplib_version }}", "restlib_version": "${{ inputs.restlib_version }}"}'
       
       # - name: Commit updates in local repository
       #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
