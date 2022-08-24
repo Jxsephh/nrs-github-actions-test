@@ -57,13 +57,9 @@ jobs:
           fi
           
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
-            echo "Updating RESTLIB version"
+            echo "Updating RESTLIB and CLIENTLIB versions"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
-          fi
-
-          if [ ! -z ${{ inputs.clientlib_version}} ] ; then
-            echo "Updating CLIENTLIB version"
-            mvn versions:set-property -Dproperty=clientLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.clientlib_version }} -q -DforceStdout
+            mvn versions:set-property -Dproperty=clientLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
           fi
 
       - name: Create pull request and commit updates
