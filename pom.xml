@@ -17,6 +17,7 @@
 		<java.version>17</java.version>
 		<soapLib.version>54-SNAPSHOT</soapLib.version>
 		<restLib.version>127-SNAPSHOT</restLib.version>
+		<clientLib.version>127-SNAPSHOT</clientLib.version>
 	</properties>
 	<dependencies>
 		<dependency>

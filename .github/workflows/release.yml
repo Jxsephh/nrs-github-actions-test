@@ -5,6 +5,9 @@ on:
       release_name:
         description: 'Release branch name'
         required: true
+      nrs_version:
+        description: 'New version of NRS'
+        required: true
       soaplib_version:
         description: 'New version of SOAPLIB'
         required: false
@@ -39,17 +42,29 @@ jobs:
           ref: develop
           fetch-depth: '0'
 
-      - name: Check for changes in SOAPLIB
-        run: |
-          echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
-        shell: bash
+      # - name: Check for changes in SOAPLIB
+      #   run: |
+      #     echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
+      #   shell: bash
 
-      - name: Update NRS version in pom.xml
-        if: ${{ env.UPGRADE_SOAPLIB }} == true
+      - name: Update dependency versions in pom.xml
+        # if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+          if [ ! -z ${{ inputs.soaplib_version }} ] ; then
+            echo "Updating SOAPLIB version"
+            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
+          fi
+          
+          if [ ! -z ${{ inputs.restlib_version}} ] ; then
+            echo "Updating RESTLIB version"
+            mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
+          fi
+
+          if [ ! -z ${{ inputs.clientlib_version}} ] ; then
+            echo "Updating CLIENTLIB version"
+            mvn versions:set-property -Dproperty=clientLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.clientlib_version }} -q -DforceStdout
+          fi
 
       - name: Create pull request and commit updates
         id: cpr
@@ -57,6 +72,7 @@ jobs:
         with:
           base: master
           branch: ${{ inputs.release_name }}
+          commit-message: "Updating dependency versions"
           draft: false
           path: main
           reviewers: Jxsephh
@@ -79,6 +95,20 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: my-event
           client-payload: '{"soaplib_version": "${{ inputs.soaplib_version }}", "restlib_version": "${{ inputs.restlib_version }}"}'
+    
+  # update-snapshot:
+  #   name: Update snapshot version in develop
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: develop
+      
+  #     - name: Update NRS version in pom.xml
+  #       run:
+  #         mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
+
       
       # - name: Commit updates in local repository
       #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
