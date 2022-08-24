@@ -40,20 +40,13 @@ jobs:
           echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
-      - name: Fetch pom.xml version from develop
-        run: |
-          echo "${{ toJson(github.events.inputs) }}"
-          cd main
-          git fetch && git checkout develop
-          echo "CURRENT_NRS_VERSION="$(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout) >> $GITHUB_ENV
-          git checkout master
-
       - name: Update pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
+          echo "${{ toJson(inputs) }}"
           echo ${{ env.CURRENT_NRS_VERSION }}
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ github.events.inputs.nrs_version }} -q -DforceStdout
+          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
 
       - name: Create pull request and commit updates
@@ -61,7 +54,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4.1.1
         with:
           base: master
-          branch: release/${{ github.events.inputs.release_name }}
+          branch: release/${{ inputs.release_name }}
           path: main
           reviewers: Jxsephh
 
@@ -70,7 +63,7 @@ jobs:
         with:
           type: now
           from_branch: develop
-          target_branch: release/${{ github.events.inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
+          target_branch: release/${{ inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Repository Dispatch
