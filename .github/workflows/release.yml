@@ -1,20 +1,26 @@
-name: Release
+name: Create release
 on:
+  workflow_dispatch:
+    inputs:
+      nrs_version:
+        description: 'Version of NRS to update pom.xml'
+        default: ''
+        required: true
+      release_name:
+        description: 'Release branch name'
+        default: ''
+        required: true
   # push:
   release:
     types: [published]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-jobs:
-  after-release:
-      runs-on: ubuntu-latest
-      steps:
-        - run: |
-            echo "Name: ${{ github.event.release.name }} Description: ${{ github.event.release.body }}"
+jobs:           
   update-dependencies:
-    name: Update dependency versions
+    name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
+    needs: fetch-release-details
     steps:
       - name: Checkout scripts
         uses: actions/checkout@v3 
@@ -28,52 +34,100 @@ jobs:
           path: github-actions-test
           ref: develop
           fetch-depth: '0'
-        
+
       - name: Check for changes in repo
         run: |
           echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
-      - name: Upgrade pom.xml versions
+      - name: Update pom.xml
+        if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
-          if [ "$UPGRADE_SOAPLIB" = "1" ] ; then
-            echo "Soaplib has changes, upgrading version in pom.xml"
-            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
-            echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-            echo "UNCOMMITED_CHANGES="false >> $GITHUB_ENV
-          else
-            echo "Soaplib has no new changes, skipping..."
-          fi
+          echo "${{ env.RELEASE_BODY }}"
+          cd main
+          git fetch && git checkout develop
+          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ github.events.inputs.nrs_version }} -q -DforceStdout
+          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
+          echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
 
-        env:
-          UPGRADE_SOAPLIB: ${{ env.UPGRADE_SOAPLIB }}
-
-      - name: Commit updates
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: ${{ env.UNCOMITTED_CHANGES == true }}
+      - name: Create pull request and commit updates
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.1.1
         with:
-          branch: develop
-          commit_message: "Upgrading dependency versions"
+          base: master
+          branch: release/${{ github.events.inputs.release_name }}
+          path: main
+          reviewers: Jxsephh
 
-  create-release:
-    name: Create release branch
-    needs: [update-dependencies]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release branch
-        uses: peterjgrainger/action-create-branch@v2.2.0
-        with:
-          branch: 'release/canyonlands'
-      
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
         with:
-          label_name: 'Merging develop into release branch'
+          type: now
           from_branch: develop
-          target_branch: release/canyonlands
+          target_branch: release/${{ github.events.inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Jxsephh/github-actions-test
+          event-type: my-event
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      
+      # - name: Commit updates in local repository
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Merging develop into release branch"
+      #     repository: main
+
+
+      # - name: Update SOAPLIB pom.xml
+      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
+      #   run: |
+      #     cd github-actions-test
+      #     touch idk.xml
+      #     git add .
+      #     ls -al
+
+      # - name: Commit updates to SOAPLIB
+      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: develop
+      #     commit_message: "Testing pushing from another repo"
+      #     repository: github-actions-test
+
+      # - name: Commit updates in local repository
+      #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Updating things"
+      #     repository: main
+
+      # - name: Checkout release branch
+      #   uses: actions/checkout@v3 
+      #   with:
+      #     path: release
+      #     ref: release/canyonlands
+
+      # - name: Check outputs
+      #   if: ${{ steps.cpr.outputs.pull-request-number }}
+      #   run: |
+      #     echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
+      #     echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+  # create-release-pr:
+  #   name: Create release branch and pull request
+  #   needs: [update-dependencies]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: develop
 
 
       ## WIP ##
