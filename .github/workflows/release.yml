@@ -21,8 +21,6 @@ on:
         description: 'Pull request description'
         required: false
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:           
   update-dependencies:
     name: Update dependency versions and create release PR
@@ -51,7 +49,7 @@ jobs:
         # if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
-            mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+          mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
@@ -70,8 +68,6 @@ jobs:
           base: master
           branch: ${{ inputs.release_name }}
           commit-message: "Updating dependency versions"
-          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          draft: false
           path: main
           reviewers: Jxsephh
           title: ${{ inputs.pr_title }}
@@ -85,14 +81,23 @@ jobs:
           target_branch: ${{ inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repository Dispatch
+      - name: SOAPLIB Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
-        if: ${{ inputs.soaplib_version }} != '' || ${{ inputs.restlib_version }} != ''
+        if: ${{ inputs.soaplib_version }} != ''
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
-          event-type: my-event
-          client-payload: '{"soaplib_version": "${{ inputs.soaplib_version }}", "restlib_version": "${{ inputs.restlib_version }}"}'
+          event-type: update
+          client-payload: '{"soaplib_version": "${{ inputs.soaplib_version }}"}'
+
+      - name: RESTLIB Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        if: ${{ inputs.restlib_version }} != ''
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Jxsephh/github-actions-test
+          event-type: update
+          client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
     
   # update-snapshot:
   #   name: Update snapshot version in develop
