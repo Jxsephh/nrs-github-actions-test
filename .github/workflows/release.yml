@@ -44,17 +44,15 @@ jobs:
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
-          echo "${{ toJson(inputs) }}"
-          echo ${{ env.CURRENT_NRS_VERSION }}
           mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
 
       - name: Create pull request and commit updates
         id: cpr
         uses: peter-evans/create-pull-request@v4.1.1
         with:
           base: master
-          branch: release/${{ inputs.release_name }}
+          branch: ${{ inputs.release_name }}
+          draft: true
           path: main
           reviewers: Jxsephh
 
@@ -63,7 +61,7 @@ jobs:
         with:
           type: now
           from_branch: develop
-          target_branch: release/${{ inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
+          target_branch: ${{ inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Repository Dispatch
