@@ -8,7 +8,7 @@
 # =============================================================================
 
 cd $1
-DIFF=$(git diff $2 $3) >/dev/null
+DIFF=$(git diff $2 $3 ':!pom.xml') >/dev/null
 
 if [ -z "$DIFF" ] ; then
 	echo 0

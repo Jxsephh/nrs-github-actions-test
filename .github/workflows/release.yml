@@ -48,6 +48,7 @@ jobs:
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
+          git checkout develop
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
