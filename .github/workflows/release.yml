@@ -1,27 +1,22 @@
 name: Create Release
 on:
+  workflow_dispatch:
+    inputs:
+      nrs_version:
+        description: 'Version of NRS to update pom.xml'
+        default: ''
+        required: true
+      release_name:
+        description: 'Release branch name'
+        default: ''
+        required: true
   # push:
   release:
     types: [published]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-jobs:
-  fetch-release-details:
-      name: Fetch release details
-      runs-on: ubuntu-latest
-      steps:
-        - run: |
-            echo "RELEASE_TITLE="${{ github.event.release.name }} >> $GITHUB_ENV
-            
-            export body="${{ github.event.release.body }}"
-            body="${body//'%'/'%25'}"
-            body="${body//$'\n'/'%0A'}"
-            body="${body//$'\r'/'%0D'}"
-            echo "RELEASE_BODY="${body} >> $GITHUB_ENV
-            
-            echo "RELEASE_TAG="${{ github.event.release.tag_name }} >> $GITHUB_ENV
-            
+jobs:           
   update-dependencies:
     name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
@@ -50,11 +45,11 @@ jobs:
       - name: Update pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
-          echo ${{ env.RELEASE_BODY }}
+          echo "${{ env.RELEASE_BODY }}"
           cd main
           git fetch && git checkout develop
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=55 -q -DforceStdout
+          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ github.events.inputs.nrs_version }} -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
 
@@ -63,7 +58,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4.1.1
         with:
           base: master
-          branch: release/canyonlands
+          branch: release/${{ github.events.inputs.release_name }}
           path: main
           reviewers: Jxsephh
 
@@ -72,7 +67,7 @@ jobs:
         with:
           type: now
           from_branch: develop
-          target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
+          target_branch: release/${{ github.events.inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Repository Dispatch
