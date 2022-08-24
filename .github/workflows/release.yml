@@ -1,4 +1,4 @@
-name: Create Release
+name: Release
 on:
   workflow_dispatch:
     inputs:
@@ -25,7 +25,6 @@ jobs:
       - name: Checkout scripts
         uses: actions/checkout@v3 
         with:
-          path: main
           ref: master
 
       - name: Checkout other repo
@@ -38,8 +37,7 @@ jobs:
 
       - name: Check for changes in repo
         run: |
-          echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
-          echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
+          echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
       - name: Update pom.xml
@@ -130,26 +128,6 @@ jobs:
   #       uses: actions/checkout@v3
   #       with:
   #         ref: develop
-
-  #     - name: Create pull request
-  #       id: cpr
-  #       uses: peter-evans/create-pull-request@v4.1.1
-  #       with:
-  #         base: master
-  #         branch: release/canyonlands
-  #         reviewers: Jxsephh
-      
-  #     - name: Check outputs
-  #       if: ${{ steps.cpr.outputs.pull-request-number }}
-  #       run: |
-  #         echo "Pull request number - ${{ steps.cpr.outputs.pull-request-number }}"
-  #         echo "Pull request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-    
-
-
-
-
-
 
 
       ## WIP ##
