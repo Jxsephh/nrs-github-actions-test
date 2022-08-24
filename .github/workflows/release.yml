@@ -2,17 +2,24 @@ name: Create release
 on:
   workflow_dispatch:
     inputs:
-      nrs_version:
-        description: 'Version of NRS to update pom.xml'
-        default: ''
-        required: true
       release_name:
         description: 'Release branch name'
-        default: ''
         required: true
-  # push:
-  release:
-    types: [published]
+      nrs_version:
+        description: New version of NRS'
+        required: true
+      soaplib_version:
+        description: 'New version of SOAPLIB'
+        required: false
+      restlib_version:
+        description: 'New version of RESTLIB and CLIENTLIB'
+        required: false
+      pr_title:
+        description: 'Pull request title'
+        required: true
+      pr_body:
+        description: 'Pull request description'
+        required: false
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,13 +28,13 @@ jobs:
     name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout scripts
+      - name: Checkout code
         uses: actions/checkout@v3 
         with:
           path: main
           ref: master
 
-      - name: Checkout other repo
+      - name: Checkout SOAPLIB code
         uses: actions/checkout@v3
         with:
           repository: Jxsephh/github-actions-test
@@ -35,12 +42,12 @@ jobs:
           ref: develop
           fetch-depth: '0'
 
-      - name: Check for changes in repo
+      - name: Check for changes in SOAPLIB
         run: |
           echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
         shell: bash
 
-      - name: Update pom.xml
+      - name: Update NRS version in pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
@@ -53,9 +60,11 @@ jobs:
         with:
           base: master
           branch: ${{ inputs.release_name }}
-          draft: true
+          draft: false
           path: main
           reviewers: Jxsephh
+          title: ${{ inputs.pr_title }}
+          body: ${{ inputs.pr_body }}
 
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
@@ -67,11 +76,12 @@ jobs:
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
+        if: ${{ inputs.soaplib_version }} != '' || ${{ inputs.restlib_version }} != ''
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
           event-type: my-event
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          client-payload: '"soaplib_version": "${{ inputs.soaplib_version }}", "restlib_version": "${{ inputs.restlib_version }}"'
       
       # - name: Commit updates in local repository
       #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
