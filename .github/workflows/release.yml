@@ -8,16 +8,24 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   fetch-release-details:
+      name: Fetch release details
       runs-on: ubuntu-latest
       steps:
         - run: |
             echo "RELEASE_TITLE="${{ github.event.release.name }} >> $GITHUB_ENV
-            echo "RELEASE_BODY="${{ github.event.release.body }} >> $GITHUB_ENV
+            
+            export RELEASE_BODY="$(...)"
+            RELEASE_BODY="${RELEASE_BODY//'%'/'%25'}"
+            RELEASE_BODY="${RELEASE_BODY//$'\n'/'%0A'}"
+            RELEASE_BODY="${RELEASE_BODY//$'\r'/'%0D'}"
+            echo "::set-env name=RELEASE_BODY::$(echo "$RELEASE_BODY")"
+            
             echo "RELEASE_TAG="${{ github.event.release.tag_name }} >> $GITHUB_ENV
             
   update-dependencies:
     name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
+    needs: fetch-release-details
     steps:
       - name: Checkout scripts
         uses: actions/checkout@v3 
@@ -33,11 +41,6 @@ jobs:
           ref: develop
           fetch-depth: '0'
 
-      # - name: Create release branch
-      #   uses: peterjgrainger/action-create-branch@v2.0.1
-      #   with:
-      #     branch: release/canyonlands
-
       - name: Check for changes in repo
         run: |
           echo "UPGRADE_SOAPLIB="$(./main/.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
@@ -47,8 +50,10 @@ jobs:
       - name: Update pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
+          echo ${{ env.RELEASE_BODY }}
           cd main
-          git checkout develop
+          ls -al
+          git checkout origin/develop
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=55 -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
