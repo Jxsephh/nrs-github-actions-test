@@ -14,9 +14,11 @@ jobs:
         - run: |
             echo "RELEASE_TITLE="${{ github.event.release.name }} >> $GITHUB_ENV
             
-            echo 'RELEASE_BODY<<EOF'  >> $GITHUB_ENV
-            echo ${{ github.event.release.body }} >> $GITHUB_ENV
-            echo 'EOF' >> $GITHUB_ENV
+            export RELEASE_BODY="${{ github.event.release.body }}"
+            RELEASE_BODY="${RELEASE_BODY//'%'/'%25'}"
+            RELEASE_BODY="${RELEASE_BODY//$'\n'/'%0A'}"
+            RELEASE_BODY="${RELEASE_BODY//$'\r'/'%0D'}"
+            echo "RELEASE_BODY="${RELEASE_BODY} >> $GITHUB_ENV
             
             echo "RELEASE_TAG="${{ github.event.release.tag_name }} >> $GITHUB_ENV
             
