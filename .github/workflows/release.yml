@@ -51,7 +51,7 @@ jobs:
         # if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
-            mvn versions:set-property -Dproperty=.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+            mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
