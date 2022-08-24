@@ -12,7 +12,7 @@ on:
         description: 'New version of SOAPLIB'
         required: false
       restlib_version:
-        description: 'New version of RESTLIB and CLIENTLIB'
+        description: 'New version of RESTLIB'
         required: false
       pr_title:
         description: 'Pull request title'
@@ -51,15 +51,16 @@ jobs:
         # if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
+            mvn versions:set-property -Dproperty=.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
           fi
           
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
-            echo "Updating RESTLIB and CLIENTLIB versions"
+            echo "Updating RESTLIB version"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
-            mvn versions:set-property -Dproperty=clientLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
           fi
 
       - name: Create pull request and commit updates
