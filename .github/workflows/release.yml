@@ -1,20 +1,22 @@
 name: Create Release
 on:
-  push:
-  # release:
-  #   types: [published]
+  # push:
+  release:
+    types: [published]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  after-release:
+  fetch-release-details:
       runs-on: ubuntu-latest
       steps:
         - run: |
-            echo "Name: ${{ github.event.release.name }}"
-            echo "Description: ${{ github.event.release.body }}"
+            echo "RELEASE_TITLE="${{ github.event.release.name }} >> $GITHUB_ENV
+            echo "RELEASE_BODY="${{ github.event.release.body }} >> $GITHUB_ENV
+            echo "RELEASE_TAG="${{ github.event.release.tag_name }} >> $GITHUB_ENV
+            
   update-dependencies:
-    name: Update dependency versions
+    name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout scripts
@@ -42,7 +44,7 @@ jobs:
           echo "UNCOMMITTED_CHANGES="false >> $GITHUB_ENV
         shell: bash
 
-      - name: Update local pom.xml
+      - name: Update pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
           cd main
@@ -50,38 +52,6 @@ jobs:
           mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=54 -q -DforceStdout
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
           echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
-
-      # - name: Update SOAPLIB pom.xml
-      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
-      #   run: |
-      #     cd github-actions-test
-      #     touch idk.xml
-      #     git add .
-      #     ls -al
-
-      # - name: Commit updates to SOAPLIB
-      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: develop
-      #     commit_message: "Testing pushing from another repo"
-      #     repository: github-actions-test
-
-          
-
-      # - name: Commit updates in local repository
-      #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: release/canyonlands
-      #     commit_message: "Updating things"
-      #     repository: main
-
-      # - name: Checkout release branch
-      #   uses: actions/checkout@v3 
-      #   with:
-      #     path: release
-      #     ref: release/canyonlands
 
       - name: Create pull request and commit updates
         id: cpr
@@ -100,12 +70,6 @@ jobs:
           target_branch: release/canyonlands #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Commit updates in local repository
-      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
-      #   with:
-      #     branch: release/canyonlands
-      #     commit_message: "Merging develop into release branch"
-      #     repository: main
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
         with:
@@ -114,6 +78,44 @@ jobs:
           event-type: my-event
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
       
+      # - name: Commit updates in local repository
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Merging develop into release branch"
+      #     repository: main
+
+
+      # - name: Update SOAPLIB pom.xml
+      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
+      #   run: |
+      #     cd github-actions-test
+      #     touch idk.xml
+      #     git add .
+      #     ls -al
+
+      # - name: Commit updates to SOAPLIB
+      #   if: ${{ env.UPGRADE_SOAPLIB }} == true
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: develop
+      #     commit_message: "Testing pushing from another repo"
+      #     repository: github-actions-test
+
+      # - name: Commit updates in local repository
+      #   if: ${{ env.UNCOMMITTED_CHANGES }} == true
+      #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
+      #   with:
+      #     branch: release/canyonlands
+      #     commit_message: "Updating things"
+      #     repository: main
+
+      # - name: Checkout release branch
+      #   uses: actions/checkout@v3 
+      #   with:
+      #     path: release
+      #     ref: release/canyonlands
+
       # - name: Check outputs
       #   if: ${{ steps.cpr.outputs.pull-request-number }}
       #   run: |
