@@ -24,6 +24,7 @@ jobs:
       - name: Checkout scripts
         uses: actions/checkout@v3 
         with:
+          path: main
           ref: master
 
       - name: Checkout other repo
@@ -42,7 +43,6 @@ jobs:
       - name: Update pom.xml
         if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
-          echo "${{ env.RELEASE_BODY }}"
           cd main
           git fetch && git checkout develop
           echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
