@@ -70,6 +70,7 @@ jobs:
           base: master
           branch: ${{ inputs.release_name }}
           commit-message: "Updating dependency versions"
+          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           draft: false
           path: main
           reviewers: Jxsephh
