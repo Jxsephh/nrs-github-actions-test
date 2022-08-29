@@ -99,6 +99,11 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
+      
+      - name: Generate Build Summary
+        run: |
+          echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
+          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY
     
   # update-snapshot:
   #   name: Update snapshot version in develop
