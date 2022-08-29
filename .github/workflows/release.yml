@@ -68,12 +68,13 @@ jobs:
           base: master
           branch: ${{ inputs.release_name }}
           commit-message: "Updating dependency versions"
+          draft: true
           path: main
           reviewers: Jxsephh
           title: ${{ inputs.pr_title }}
           body: ${{ inputs.pr_body }}
 
-      - name: Merge develop -> release branch
+      - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
         with:
           type: now
