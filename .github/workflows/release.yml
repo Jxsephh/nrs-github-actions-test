@@ -110,7 +110,11 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
-
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: ${{ inputs.release_name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: update-pull-request
         uses: kt3k/update-pr-description@v1.0.1
         with:
