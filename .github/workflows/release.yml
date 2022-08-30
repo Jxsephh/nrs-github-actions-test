@@ -86,7 +86,7 @@ jobs:
             -**US.....:**
             ---
             ### Related versions:
-            $BODY_RELATED_VERSIONS
+            ${{ BODY_RELATED_VERSIONS }}
             ${{ inputs.pr_body }}
 
       - name: Merge develop into release branch
