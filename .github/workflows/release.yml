@@ -99,7 +99,7 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
           event-type: update
-          client-payload: '{"release_name": "${{ inputs.release_name }}", "soaplib_version": "${{ inputs.soaplib_version }}"},"pr_title": "${{ inputs.pr_title }}", "pr_body": "${{ inputs.pr_body }}'
+          client-payload: '{"release_name": "${{ inputs.release_name }}", "soaplib_version": "${{ inputs.soaplib_version }}","pr_title": "${{ inputs.pr_title }}", "pr_body": "${{ inputs.pr_body }}"}'
 
       - name: RESTLIB Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
@@ -108,7 +108,7 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
           event-type: update
-          client-payload: '{"release_name": "${{ inputs.release_name }}", "restlib_version": "${{ inputs.restlib_version }}", "pr_title": "${{ inputs.pr_title }}", "pr_body": "${{ inputs.pr_body }}'
+          client-payload: '{"release_name": "${{ inputs.release_name }}", "restlib_version": "${{ inputs.restlib_version }}", "pr_title": "${{ inputs.pr_title }}", "pr_body": "${{ inputs.pr_body }}"}'
 
       # - name: Update PR????
       #   id: cpr2
