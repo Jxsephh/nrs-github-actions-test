@@ -131,7 +131,7 @@ jobs:
       - name: Generate Build Summary
         run: |
           echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
-          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY.
+          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY
   # update-snapshot:
   #   name: Update snapshot version in develop
   #   runs-on: ubuntu-latest
