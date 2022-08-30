@@ -2,31 +2,37 @@ name: Create release
 on:
   workflow_dispatch:
     inputs:
-      nrs_version:
-        description: 'Version of NRS to update pom.xml'
-        default: ''
-        required: true
       release_name:
         description: 'Release branch name'
-        default: ''
         required: true
-  # push:
-  release:
-    types: [published]
+      nrs_version:
+        description: 'New version of NRS'
+        required: true
+      soaplib_version:
+        description: 'New version of SOAPLIB'
+        required: false
+      restlib_version:
+        description: 'New version of RESTLIB'
+        required: false
+      pr_title:
+        description: 'Pull request title'
+        required: true
+      pr_body:
+        description: 'Pull request description'
+        required: false
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:           
   update-dependencies:
     name: Update dependency versions and create release PR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout scripts
+      - name: Checkout code
         uses: actions/checkout@v3 
         with:
+          path: main
           ref: master
 
-      - name: Checkout other repo
+      - name: Checkout SOAPLIB code
         uses: actions/checkout@v3
         with:
           repository: Jxsephh/github-actions-test
@@ -34,52 +40,90 @@ jobs:
           ref: develop
           fetch-depth: '0'
 
-      - name: Check for changes in repo
-        run: |
-          echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
-        shell: bash
+      # - name: Check for changes in SOAPLIB
+      #   run: |
+      #     echo "UPGRADE_SOAPLIB="$(./.github/scripts/check-changes-across-branches.sh github-actions-test develop origin/master) >> $GITHUB_ENV
+      #   shell: bash
 
-      - name: Update pom.xml
-        if: ${{ env.UPGRADE_SOAPLIB }} == true
+      - name: Update dependency versions in pom.xml
+        # if: ${{ env.UPGRADE_SOAPLIB }} == true
         run: |
-          echo "${{ env.RELEASE_BODY }}"
           cd main
-          git fetch && git checkout develop
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-          mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ github.events.inputs.nrs_version }} -q -DforceStdout
-          echo $(mvn help:evaluate -Dexpression=soapLib.version -q -DforceStdout)
-          echo "UNCOMMITTED_CHANGES="true >> $GITHUB_ENV
+          mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+
+          if [ ! -z ${{ inputs.soaplib_version }} ] ; then
+            echo "Updating SOAPLIB version"
+            mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
+          fi
+          
+          if [ ! -z ${{ inputs.restlib_version}} ] ; then
+            echo "Updating RESTLIB version"
+            mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
+          fi
 
       - name: Create pull request and commit updates
         id: cpr
         uses: peter-evans/create-pull-request@v4.1.1
         with:
           base: master
-          branch: release/${{ github.events.inputs.release_name }}
+          branch: ${{ inputs.release_name }}
+          commit-message: "Updating dependency versions"
+          draft: true
           path: main
           reviewers: Jxsephh
+          title: ${{ inputs.pr_title }}
           body: |
             ### Included stories:
             -**US.....:**
             ---
             ### Related versions:
             [nrs ${{ github.events.inputs.release_name }}](https://github.com/AAInternal/nrs/pull/)
+            ${{ inputs.pr_body }}
 
-      - name: Merge develop -> release branch
+      - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
         with:
           type: now
           from_branch: develop
-          target_branch: release/${{ github.events.inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
+          target_branch: ${{ inputs.release_name }} #${{steps.get_release.outputs.tag_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repository Dispatch
+      - name: SOAPLIB Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
+        if: ${{ inputs.soaplib_version }} != ''
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: Jxsephh/github-actions-test
-          event-type: my-event
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          event-type: update
+          client-payload: '{"soaplib_version": "${{ inputs.soaplib_version }}"}'
+
+      - name: RESTLIB Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        if: ${{ inputs.restlib_version }} != ''
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Jxsephh/github-actions-test
+          event-type: update
+          client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
+      
+      - name: Generate Build Summary
+        run: |
+          echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
+          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY
+    
+  # update-snapshot:
+  #   name: Update snapshot version in develop
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: develop
+      
+  #     - name: Update NRS version in pom.xml
+  #       run:
+  #         mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
+
       
       # - name: Commit updates in local repository
       #   uses: stefanzweifel/git-auto-commit-action@v4.14.1
