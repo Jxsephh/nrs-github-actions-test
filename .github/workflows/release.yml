@@ -53,8 +53,7 @@ jobs:
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
           echo "$FOO"
           echo "BODY_RELATED_VERSIONS=nrs ${{ inputs.nrs_version }}" >> $GITHUB_ENV
-          echo "BODY RELATED VERSIONS TEXT =" ${{ env.BODY_RELATED_VERSIONS }}
-
+          echo "BODY RELATED VERSIONS TEXT = $BODY_RELATED_VERSIONS" 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
