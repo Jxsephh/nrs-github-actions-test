@@ -85,6 +85,24 @@ jobs:
         run: |
           echo "BODY_NRS_VERSION=[nrs " ${{ inputs.nrs_version }} "]("${{ steps.cpr.outputs.pull-request-url }}")" >> $GITHUB_ENV
 
+      - name: Update PR????
+        id: cpr2
+        uses: peter-evans/create-pull-request@v4.1.1
+        with:
+          base: master
+          branch: ${{ inputs.release_name }}
+          commit-message: "Updating dependency versions"
+          draft: true
+          path: main
+          body: | 
+            ${{ inputs.pr_body }}
+            ### Included stories:
+            -**US.....:**
+
+            ---
+            ### Related versions:
+            ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
+      
       - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
         with:
@@ -110,24 +128,6 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
-
-      - name: Update PR????
-        id: cpr2
-        uses: peter-evans/create-pull-request@v4.1.1
-        with:
-          base: master
-          branch: ${{ inputs.release_name }}
-          commit-message: "Updating dependency versions"
-          draft: true
-          path: main
-          body: | 
-            ${{ inputs.pr_body }}
-            ### Included stories:
-            -**US.....:**
-
-            ---
-            ### Related versions:
-            ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
 
       - name: Generate Build Summary
         run: |
