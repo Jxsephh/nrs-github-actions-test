@@ -54,20 +54,20 @@ jobs:
         run: |
           cd main
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
-          echo "BODY_NRS_VERSION=[NRS " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/) | " >> $GITHUB_ENV
+          echo "BODY_NRS_VERSION=[nrs " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/)" >> $GITHUB_ENV
           echo $BODY_NRS_VERSION
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
-            echo "BODY_NRS_SOAP_VERSION= [NRS Soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/) | " >> $GITHUB_ENV
+            echo "BODY_NRS_SOAP_VERSION= | [nrs soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/)" >> $GITHUB_ENV
           fi
 
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
             echo "Updating RESTLIB version"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
-            echo "BODY_NRS_REST_VERSION= [NRS Rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/) | " >> $GITHUB_ENV
-            echo "BODY_NRS_CLIENT_VERSION= [NRS Client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/) | " >> $GITHUB_ENV
+            echo "BODY_NRS_REST_VERSION= | [nrs rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/)" >> $GITHUB_ENV
+            echo "BODY_NRS_CLIENT_VERSION= | [nrs client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/)" >> $GITHUB_ENV
           fi
       - name: test log
         run: |
@@ -88,9 +88,10 @@ jobs:
             ${{ inputs.pr_body }}
             ### Included stories:
             -**US.....:**
+
             ---
             ### Related versions:
-            ${{ env.BODY_RELATED_VERSIONS }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
+            ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
 
       - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
@@ -117,6 +118,23 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
+
+      - name: update PR body
+        uses: gr2m/create-or-update-pull-request-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body: "My pull request body"
+          branch: ${{ inputs.release_name }}
+          path: main
+          # commit-message: "My commit message for uncommitted changes in lib/ folder"
+          # author: "Lorem J. Ipsum <lorem@example.com>"
+          # labels: label1, label2
+          # assignees: user1, user2
+          # reviewers: user1, user2
+          # team_reviewers: team1, team2
+          # auto-merge: squash
+          update-pull-request-title-and-body: true
       
       - name: Generate Build Summary
         run: |
