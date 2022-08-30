@@ -126,7 +126,7 @@ jobs:
         with:
           body: "My pull request body"
           branch: ${{ inputs.release_name }}
-          path: main
+          path: "main/"
           # commit-message: "My commit message for uncommitted changes in lib/ folder"
           # author: "Lorem J. Ipsum <lorem@example.com>"
           # labels: label1, label2
