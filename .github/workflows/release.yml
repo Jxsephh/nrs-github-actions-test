@@ -110,15 +110,17 @@ jobs:
           repository: Jxsephh/github-actions-test
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
-      - name: pull-request
-        uses: repo-sync/pull-request@v2
+          
+      - name: Update PR????
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.1.1
         with:
-          destination_branch: ${{ inputs.release_name }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: update-pull-request
-        uses: kt3k/update-pr-description@v1.0.1
-        with:
-          pr_body: | 
+          base: master
+          branch: ${{ inputs.release_name }}
+          commit-message: "Updating dependency versions"
+          draft: true
+          path: main
+          body: | 
             ${{ inputs.pr_body }}
             ### Included stories:
             -**US.....:**
@@ -126,9 +128,7 @@ jobs:
             ---
             ### Related versions:
             ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
-          destination_branch: ${{ inputs.release_name }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Generate Build Summary
         run: |
           echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
