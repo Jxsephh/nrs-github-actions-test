@@ -58,6 +58,12 @@ jobs:
           branch: release/${{ github.events.inputs.release_name }}
           path: main
           reviewers: Jxsephh
+          body: |
+            ### Included stories:
+            -**US.....:**
+            ---
+            ### Related versions:
+            [nrs ${{ github.events.inputs.release_name }}](https://github.com/AAInternal/nrs/pull/)
 
       - name: Merge develop -> release branch
         uses: devmasx/merge-branch@master
