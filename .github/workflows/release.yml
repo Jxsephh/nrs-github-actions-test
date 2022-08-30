@@ -50,16 +50,21 @@ jobs:
         run: |
           cd main
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
+          echo "BODY_RELATED_VERSIONS=nrs ${{ inputs.nrs_version}}" >> $GITHUB_ENV
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
+            echo "BODY_RELATED_VERSIONS=$BODY_RELATED_VERSIONS nrs soap ${{ inputs.soaplib_version}}" >> $GITHUB_ENV
           fi
-          
+
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
             echo "Updating RESTLIB version"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
+            BODY_RELATED_VERSIONS=BODY_RELATED_VERSIONS + "nrs rest ${{ inputs.restlib_version}}"
+            echo "$BODY_RELATED_VERSIONS=$BODY_RELATED_VERSIONS nrs rest ${{ inputs.restlib_version}}" >> $GITHUB_ENV
           fi
+          echo $BODY_RELATED_VERSIONS
 
       - name: Create pull request and commit updates
         id: cpr
