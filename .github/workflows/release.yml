@@ -69,9 +69,6 @@ jobs:
             echo "BODY_NRS_REST_VERSION= | [nrs rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/)" >> $GITHUB_ENV
             echo "BODY_NRS_CLIENT_VERSION= | [nrs client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/)" >> $GITHUB_ENV
           fi
-      - name: test log
-        run: |
-          echo $BODY_NRS_VERSION
 
       - name: Create pull request and commit updates
         id: cpr
@@ -84,14 +81,9 @@ jobs:
           path: main
           reviewers: Jxsephh
           title: ${{ inputs.pr_title }}
-          body: |
-            ${{ inputs.pr_body }}
-            ### Included stories:
-            -**US.....:**
-
-            ---
-            ### Related versions:
-            ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
+      - name: test log
+        run: |
+          echo "BODY_NRS_VERSION=[nrs " ${{ inputs.nrs_version }} "]("${{ steps.cpr.outputs.pull-request-url }}")" >> $GITHUB_ENV
 
       - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
@@ -119,22 +111,20 @@ jobs:
           event-type: update
           client-payload: '{"restlib_version": "${{ inputs.restlib_version }}"}'
 
-      - name: update PR body
-        uses: gr2m/create-or-update-pull-request-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: update-pull-request
+        uses: kt3k/update-pr-description@v1.0.1
         with:
-          body: "My pull request body"
-          branch: ${{ inputs.release_name }}
-          # commit-message: "My commit message for uncommitted changes in lib/ folder"
-          # author: "Lorem J. Ipsum <lorem@example.com>"
-          # labels: label1, label2
-          # assignees: user1, user2
-          # reviewers: user1, user2
-          # team_reviewers: team1, team2
-          # auto-merge: squash
-          update-pull-request-title-and-body: true
-      
+          pr_body: | 
+            ${{ inputs.pr_body }}
+            ### Included stories:
+            -**US.....:**
+
+            ---
+            ### Related versions:
+            ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
+          destination_branch: ${{ inputs.release_name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        
       - name: Generate Build Summary
         run: |
           echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
