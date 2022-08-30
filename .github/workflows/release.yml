@@ -89,10 +89,6 @@ jobs:
             ---
             ### Related versions:
             ${{ env.BODY_NRS_VERSION }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
-            
-      - name: test log
-        run: |
-          echo ${{ env.BODY_NRS_VERSION }}
 
       - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
