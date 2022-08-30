@@ -21,7 +21,10 @@ on:
         description: 'Pull request description'
         required: false
 env: 
-  BODY_RELATED_VERSIONS: ""
+  BODY_NRS_VERSION: ""
+  BODY_NRS_SOAP_VERSION: ""
+  BODY_NRS_REST_VERSION: ""
+  BODY_NRS_CLIENT_VERSION: ""
 jobs:           
   update-dependencies:
     name: Update dependency versions and create release PR
@@ -51,24 +54,24 @@ jobs:
         run: |
           cd main
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
-          echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/) | " >> $GITHUB_ENV
-          echo $BODY_RELATED_VERSIONS
+          echo "BODY_NRS_VERSION=[NRS " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/) | " >> $GITHUB_ENV
+          echo $BODY_NRS_VERSION
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
-            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/) | " >> $GITHUB_ENV
+            echo "BODY_NRS_SOAP_VERSION= [NRS Soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/) | " >> $GITHUB_ENV
           fi
 
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
             echo "Updating RESTLIB version"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
-            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/) | " >> $GITHUB_ENV
-            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/) | " >> $GITHUB_ENV
+            echo "BODY_NRS_REST_VERSION= [NRS Rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/) | " >> $GITHUB_ENV
+            echo "BODY_NRS_CLIENT_VERSION= [NRS Client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/) | " >> $GITHUB_ENV
           fi
       - name: test log
         run: |
-          echo $BODY_RELATED_VERSIONS
+          echo $BODY_NRS_VERSION
 
       - name: Create pull request and commit updates
         id: cpr
@@ -82,12 +85,12 @@ jobs:
           reviewers: Jxsephh
           title: ${{ inputs.pr_title }}
           body: |
+            ${{ inputs.pr_body }}
             ### Included stories:
             -**US.....:**
             ---
             ### Related versions:
-            ${{ env.BODY_RELATED_VERSIONS }}
-            ${{ inputs.pr_body }}
+            ${{ env.BODY_RELATED_VERSIONS }} ${{ env.BODY_NRS_SOAP_VERSION }} ${{ env.BODY_NRS_REST_VERSION }} ${{ env.BODY_NRS_CLIENT_VERSION }}
 
       - name: Merge develop into release branch
         uses: devmasx/merge-branch@master
