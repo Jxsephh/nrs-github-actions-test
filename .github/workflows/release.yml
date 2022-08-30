@@ -51,20 +51,20 @@ jobs:
         run: |
           cd main
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
-          echo "BODY_RELATED_VERSIONS= $BODY_RELATED_VERSIONS [NRS " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/) | " >> $GITHUB_ENV
+          echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs/pull/) | " >> $GITHUB_ENV
           echo $BODY_RELATED_VERSIONS
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
             mvn versions:set-property -Dproperty=soapLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.soaplib_version }} -q -DforceStdout
-            echo "BODY_RELATED_VERSIONS= $BODY_RELATED_VERSIONS [NRS Soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/) | " >> $GITHUB_ENV
+            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Soap " ${{ inputs.soaplib_version }} "](https://github.com/AAInternal/nrs-soaplib/pull/) | " >> $GITHUB_ENV
           fi
 
           if [ ! -z ${{ inputs.restlib_version}} ] ; then
             echo "Updating RESTLIB version"
             mvn versions:set-property -Dproperty=restLib.version -DgenerateBackupPoms=false -DnewVersion=${{ inputs.restlib_version }} -q -DforceStdout
-            echo "BODY_RELATED_VERSIONS= $BODY_RELATED_VERSIONS [NRS Rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/) | " >> $GITHUB_ENV
-            echo "BODY_RELATED_VERSIONS= $BODY_RELATED_VERSIONS [NRS Client " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-client/pull/) | " >> $GITHUB_ENV
+            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Rest " ${{ inputs.restlib_version }} "](https://github.com/AAInternal/nrs-restlib/pull/) | " >> $GITHUB_ENV
+            echo "BODY_RELATED_VERSIONS=" ${{ env.BODY_RELATED_VERSIONS }} "[NRS Client " ${{ inputs.nrs_version }} "](https://github.com/AAInternal/nrs-client/pull/) | " >> $GITHUB_ENV
           fi
       - name: test log
         run: |
