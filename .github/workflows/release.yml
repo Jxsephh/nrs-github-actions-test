@@ -22,7 +22,7 @@ on:
         required: false
 env: 
   FOO: "HI"
-  BODY_RELATED_VERSIONS: ""
+  BODY_RELATED_VERSIONS: "WHY YOU NO WORK"
 jobs:           
   update-dependencies:
     name: Update dependency versions and create release PR
@@ -114,8 +114,20 @@ jobs:
       - name: Generate Build Summary
         run: |
           echo '### Release PR Created!' >> $GITHUB_STEP_SUMMARY
-          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY
-    
+          echo '**Pull Request URL:** [${{ steps.cpr.outputs.pull-request-url }}](${{ steps.cpr.outputs.pull-request-url }})' >> $GITHUB_STEP_SUMMARY.
+  test:
+    name: log some varaibles
+    runs-on: ubuntu-latest
+    steps:
+      - name: log some varaibles
+        uses: actions/checkout@v3
+
+      - name: log some variables
+        run:
+          echo "$FOO"
+          echo "${{ inputs.nrs_version }}"
+          echo "${BODY_RELATED_VERSIONS}=nrs" >> $GITHUB_ENV
+          echo "BODY RELATED VERSIONS TEXT = $BODY_RELATED_VERSIONS" 
   # update-snapshot:
   #   name: Update snapshot version in develop
   #   runs-on: ubuntu-latest
