@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>nrs-github-actions-test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>5.39.0-0</version>
 	<name>nrs-github-actions-test</name>
 	<description>Testing GitHub Actions for NRS</description>
 	<properties>
