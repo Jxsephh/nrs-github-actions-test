@@ -51,10 +51,9 @@ jobs:
         run: |
           cd main
           mvn versions:set -DgenerateBackupPoms=false -DnewVersion=${{ inputs.nrs_version }} -q -DforceStdout
-          FOO="nrs ${{ inputs.nrs_version}}"
-          echo "FOO=${FOO}" >> $GITHUB_ENV
-          FOO="${{ FOO }} nrs2 ${{ inputs.nrs_version}}"
-          echo "FOO=${FOO}" >> $GITHUB_ENV
+          echo "$FOO"
+          echo "BODY_RELATED_VERSIONS=nrs ${{ inputs.nrs_version }}" >> $GITHUB_ENV
+          echo "BODY RELATED VERSIONS TEXT =" $BODY_RELATED_VERSIONS
 
           if [ ! -z ${{ inputs.soaplib_version }} ] ; then
             echo "Updating SOAPLIB version"
