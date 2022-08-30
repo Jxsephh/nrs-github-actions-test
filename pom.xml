@@ -10,13 +10,13 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>nrs-github-actions-test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>5.31.0.6-1</version>
 	<name>nrs-github-actions-test</name>
 	<description>Testing GitHub Actions for NRS</description>
 	<properties>
 		<java.version>17</java.version>
-		<soapLib.version>54-SNAPSHOT</soapLib.version>
-		<restLib.version>127-SNAPSHOT</restLib.version>
+		<soapLib.version>56</soapLib.version>
+		<restLib.version>134</restLib.version>
 	</properties>
 	<dependencies>
 		<dependency>
